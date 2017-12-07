@@ -1,0 +1,30 @@
+doc       = { (src | line)+ }
+
+src       = { name_line? ~ begin ~ body ~ end }
+
+name_line = _{ name_kw ~ name }
+
+begin     = { begin_kw ~ word ~ (space+ ~ arg)* ~ new_line }
+body      = { (!end ~ code_line)* }
+end       = _{ "#+END_SRC" ~ line }
+
+name_kw   = _{ "#+NAME:" ~ space*}
+name      = { line }
+
+begin_kw  = _{ "#+BEGIN_SRC" ~ space+ }
+word      = _{ (!brk ~ any)+ ~ &brk}
+arg       = _{ arg_name ~ space+ ~ arg_value }
+arg_name  = { word }
+arg_value = { word }
+
+code_line = { line }
+
+line      = _{ (!new_line ~ any)* ~ new_line }
+new_line  = _{ "\n" | "\r\n" | "\r" }
+space     = _{ " " | "\t" }
+brk       = _{ space | new_line }
+
+orgmacro  = { prefix ~ "<<" ~ link ~ ">>" ~ suffix }
+prefix    = { (!"<<" ~ any)* }
+link      = { (!">>" ~ any)+ }
+suffix    = { any* }

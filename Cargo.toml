@@ -1,0 +1,13 @@
+[package]
+name = "org-tangle"
+version = "0.1.0"
+authors = ["Ruslan Prokopchuk <fer.obbee@gmail.com>"]
+
+[dependencies]
+clap = "2.28"
+pest = "1.0.0-beta"
+pest_derive = "1.0.0-beta"
+
+[profile.release]
+panic = "abort"
+lto = true
