@@ -16,7 +16,7 @@ use pest::inputs::FileInput;
 
 // force cargo to rebuild on grammar change
 #[cfg(debug_assertions)]
-const _GRAMMAR: &'static str = include_str!("org.pest");
+const _GRAMMAR: &str = include_str!("org.pest");
 
 #[derive(Parser)]
 #[grammar = "org.pest"]
@@ -30,7 +30,7 @@ fn tangle(f: &mut BufWriter<File>, name_to_body: &NameToBody, name: &str, prefix
         "Macro `{}` is undefined!",
         name
     ));
-    if body.len() == 0 {
+    if body.is_empty() {
         return;
     }
     let paddle = body[0].find(|x| x != ' ').unwrap_or(0);
@@ -46,11 +46,11 @@ fn tangle(f: &mut BufWriter<File>, name_to_body: &NameToBody, name: &str, prefix
                 let m: Vec<_> = m.into_inner().map(|x| String::from(x.as_str())).collect();
                 let prefix = String::from(prefix) + &m[0];
                 tangle(f, name_to_body, &m[1], &prefix);
-                f.write(m[2].as_bytes()).unwrap();
+                f.write_all(m[2].as_bytes()).unwrap();
             }
         } else {
-            f.write(prefix.as_bytes()).unwrap();
-            f.write(line.as_bytes()).unwrap();
+            f.write_all(prefix.as_bytes()).unwrap();
+            f.write_all(line.as_bytes()).unwrap();
         }
     }
 }
@@ -63,13 +63,13 @@ fn tangle_all(path_to_name: &PathToName, name_to_body: &NameToBody) {
             create_dir_all(parent).unwrap();
         }
         let mut f = BufWriter::new(File::create(path).unwrap());
-        tangle(&mut f, &name_to_body, &name, &"");
+        tangle(&mut f, name_to_body, name, "");
     }
 }
 
 // dumb solution for borrowing problem in parse_doc inner loop
 fn unwrap_clone<T: Clone>(x: &Option<T>) -> T {
-    x.as_ref().map(|x| x.clone()).unwrap()
+    x.as_ref().cloned().unwrap()
 }
 
 fn parse_doc(input: &str) -> (PathToName, NameToBody) {
